@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style> 
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: linear-gradient(to right, #6dd5ed, #2193b0);
+    color: white;
+    padding: 20px;
+}
+  
+#app {
+    max-width: 500px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+}
+  
+.search-box {
+    margin: 20px 0;
+}
+  
+input {
+    padding: 10px;
+    width: 70%;
+    border: none;
+    border-radius: 5px;
+}
+  
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ff6f61;
+    color: white;
+    cursor: pointer;
+}
+  
+button:hover {
+    background-color: #ff3b30;
+}
+  
+.hidden {
+    display: none;
+}
+  
+#weather-info img {
+    width: 100px;
+    margin: 10px 0;
+}
+  
+
+.card h2 {
+    margin: 0;
+}
+
+
+.city-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Ensures that the city name and flag take full width */
+    margin-bottom: 10px;
+}
+
+.card p {
+    margin: 10px 0;
+}
+  
+.flag {
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+}
+
+/* Styling for the info circles */
+.info-row {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+}
+
+.info-circle {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    color: black;
+    font-size: 14px;
+    text-align: center;
+    padding: 0 15px;
+    margin-left: 10px;
+}
+
+.info-circle img {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 5px;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+    color: black;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers items horizontally */
+    justify-content: center; /* Centers items vertically */
+}
+
+.card img {
+    width: 100px;
+    margin: 10px 0;
+}
+
+.temp {
+    font-size: 50px;
+    margin: 10px 0;
+    text-align: center; /* Center-align temperature text */
+}
+
+.temp{
+    font-size: 50px;
+}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Weather App</h1>
+    <div class="search-box">
+      <input type="text" id="city-input" placeholder="Enter city name">
+      <button id="search-btn">Search</button>
+    </div>
+    <div id="weather-info" class="hidden">
+      <div class="card">
+        <!-- City and Flag Container -->
+        <div class="city-container">
+          <h2 id="city-name"></h2><img id="country-flag" class="flag" alt="Flag">
+        </div>
+        
+        <img id="weather-icon" alt="Weather Icon">
+        <p class="temp"><strong></strong> <span id="temperature"></span>°C</p>
+        
+        <!-- Info circles for humidity, clouds, and pressure -->
+        <div class="info-row">
+          <div class="info-circle" id="humidity-circle">
+            <img src="https://img.icons8.com/ios/50/000000/humidity.png" alt="Humidity Icon">
+            <span id="humidity"></span>%
+          </div>
+          <div class="info-circle" id="clouds-circle">
+            <img src="https://img.icons8.com/ios/50/000000/cloud.png" alt="Clouds Icon">
+            <span id="clouds"></span>%
+          </div>
+          <div class="info-circle" id="pressure-circle">
+            <img src="https://img.icons8.com/ios/50/000000/pressure.png" alt="Pressure Icon">
+            <span id="pressure"></span> hPa
+          </div>
+        </div>
+
+        <p><strong>Country:</strong> <span id="country"></span></p>
+        <p><strong>Time:</strong> <span id="time"></span></p>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Function to fetch weather data based on city name
+function fetchWeather(city) {
+    const apiKey = 'e3c6d9baa6c50b879b5bcebd8e607e3d';  // Replace with your API key
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+  
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        if (data.cod === 200) {
+          // Show weather info
+          document.getElementById('weather-info').classList.remove('hidden');
+          document.getElementById('city-name').textContent = `${data.name}, ${data.sys.country}`;
+          document.getElementById('temperature').textContent = data.main.temp;
+          document.getElementById('humidity').textContent = data.main.humidity;
+          document.getElementById('clouds').textContent = data.clouds.all;
+          document.getElementById('pressure').textContent = data.main.pressure;
+          document.getElementById('country').textContent = data.sys.country;
+  
+          // Add the country flag
+          const flagUrl = `https://flagcdn.com/w320/${data.sys.country.toLowerCase()}.png`;
+          document.getElementById('country-flag').src = flagUrl;
+  
+          // Convert timestamp to local time
+          const date = new Date(data.dt * 1000);
+          document.getElementById('time').textContent = date.toLocaleString();
+  
+          // Weather Icon
+          const iconCode = data.weather[0].icon;
+          document.getElementById('weather-icon').src = `http://openweathermap.org/img/wn/${iconCode}.png`;
+        } else {
+          alert('City not found!');
+        }
+      })
+      .catch(error => console.error('Error fetching weather data:', error));
+}
+
+// Fetch weather for a default city (Kisumu) when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    fetchWeather('Kisumu');  // Automatically fetch weather for Kisumu
+});
+  
+// Search button event listener
+document.getElementById('search-btn').addEventListener('click', function() {
+    const city = document.getElementById('city-input').value;
+    if (city) {
+        fetchWeather(city);  // Fetch weather for the searched city
+    } else {
+        alert('Please enter a city name.');
+    }
+});
+  
+// Add event listener for the Enter key in the input field
+document.getElementById('city-input').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        const city = document.getElementById('city-input').value;
+        if (city) {
+            fetchWeather(city);  // Fetch weather for the searched city
+        } else {
+            alert('Please enter a city name.');
+        }
+    }
+});
+
+  </script>
+</body>
+</html>
